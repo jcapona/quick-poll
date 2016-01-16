@@ -3,12 +3,11 @@ var exphbs = require('express-handlebars');
 var app = express();
  
 // Configure express to use handlebars templates
-var hbs = exphbs.create({
-    defaultLayout: 'main', //we will be creating this layout shortly
-});
+var hbs = exphbs.create({defaultLayout: 'main'});
 app.engine('handlebars', hbs.engine);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
+
 
 ///////////////////////////////////////
 // DB
@@ -17,22 +16,17 @@ var mongoose = require('mongoose');
 mongoose.connect("mongodb://example:example@ds045785.mongolab.com:45785/quick-poll");
 
 var UserSchema = new mongoose.Schema({
-    username: String,
-    password: String,
-    email: String,
-    avatar: String,
-    salt: String,
-    hash: String
+    username: {type: String, unique: true, index: true},
+    password: {type: String, required: true},
+    //name: {type: String, required: true},
+    email: {type: String, unique: true, required: true},
+    avatar: {type: String, default: "https://www.porternovelli.com/wp-content/themes/pndotcom/img/default_avatar.png"},
+    created: { type: Date, default: Date.now },
 });
-
 var User = mongoose.model('users', UserSchema);
 
-
-
 ///////////////////////////////////////
 ///////////////////////////////////////
-
-
 
 
 // Auth strategy
@@ -54,15 +48,6 @@ passport.use(new LocalStrategy(
   }
 ));
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
 
 // App configuration
 app.configure(function() {
@@ -75,37 +60,73 @@ app.configure(function() {
   app.use(app.router);
 });
 
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
 
 // Routes 
 app.get('/', function (req, res) {
-    res.render('home');
+  res.render('home', {user: req.user});
 });
 
 app.get('/signin', function (req, res) {
-    res.render('signin');
+  res.render('signin');
 });
 
-app.post('/login', function(req, res, next) {
-  passport.authenticate('local', function(err, user, info) {
-    if (err)
-      return next(err);
-    if (!user)
-      return res.redirect('/signin');
-    req.logIn(user, function(err) 
-    {
-      if(err)
-        return next(err);
-      else
-        return res.redirect('/users/' + user.username);
-    });
-  })(req, res, next);
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/signin'
+  })
+);
+
+app.post('/signup', function(req, res, next) {
+    var password = req.body.password;
+    var username = req.body.username;
+    var email = req.body.email;
+    var avatar = req.body.avatar;
+
+    var user = new User({
+        username: username,
+        password : password,
+        email: email,
+        avatar: avatar
+    }).save(function (err, newUser) {
+        if(err)
+        {
+          console.log(err);
+          return res.redirect('/signin');
+        }
+        passport.authenticate('local')(req, res, function () {
+          res.redirect('/');
+        });
+      });
 });
 
 app.get('/users/:usr', function (req, res) {
-    console.log(req.params.usr);
-    res.render('users', {user: req.params.usr});
+    User.findOne({ username: req.params.usr }, function (err, user) {
+      if(err)
+        return done(err);
+      if (!user)
+        res.render('users'  );
+      else 
+        res.render('users', {user: user});
+    });
 });
 
+app.get('/dashboard', function (req, res) {
+    res.render('users', {user: req.user});
+});
+
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
 
 app.listen(process.env.PORT || 5000);
 
