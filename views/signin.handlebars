@@ -1,0 +1,67 @@
+<!-- views/signin.handlebars -->
+<div class="container">
+  <h1 class="text-center">Log in or Sign Up!</h1>
+  
+  <button type="button" class="btn btn-default btn-lg btn-block" id="login-btn">Login! <span class="caret"></span></button>
+  <div class="container hidden" id="login-form">
+    <form id="local-signin" action="/login" method="post">
+      <div class="form-group">
+          <label>Username:</label>
+          <input type="text" name="username" placeholder="Username" class="form-control">
+      </div>
+      <div class="form-group">
+          <label>Password:</label>
+          <input type="password" name="password" placeholder="Password" class="form-control">
+      </div>
+      <div class="form-group">
+          <input type="submit" value="Log In"/>
+      </div>
+    </form>
+  </div>
+  <button type="button" class="btn btn-default btn-lg btn-block" id="register-btn">Register <span class="caret"></span></button>
+  <div class="container hidden" id="reg-form">
+    <form id="local-reg" action="/signup" method="post">
+      <div class="form-group">
+          <label>New Username:</label>
+          <input type="text" name="username" required placeholder="Enter a username" class="form-control">
+      </div>
+      <div class="form-group">
+          <label>Password:</label>
+          <input type="password" name="password" required placeholder="Enter your password" class="form-control">
+      </div>
+      <div class="form-group">
+          <label>E-Mail:</label>
+          <input type="email" name="email" required placeholder="Enter a valid email address" class="form-control">
+      </div>
+      <div class="form-group">
+          <input type="submit" value="Register"/>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+
+  $("#register-btn").on("click",function(){
+      $("#register-btn").addClass("active");
+      $("#login-btn").removeClass("active");
+      $("#login-form").addClass("hidden");
+      $("#reg-form").removeClass("hidden");
+      $("#reg-form").addClass("show");
+  });
+  
+  $("#login-btn").on("click",function(){
+      $("#login-btn").addClass("active");
+      $("#register-btn").removeClass("active");
+      $("#reg-form").addClass("hidden");
+      $("#login-form").removeClass("hidden");
+      $("#login-form").addClass("show");
+  });
+  
+</script>
+
+
+  <div>
+      {{#if err}} res.locals.message = '<p class="msg error">' + err + '</p>'; {{/if}}
+  </div>
+

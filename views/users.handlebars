@@ -1,4 +1,4 @@
-<!-- views/home.handlebars -->
+<!-- views/users.handlebars -->
 {{#if user}}
 <div class="container">
   <h1 class="text-center">{{user.username}}</h1>
@@ -10,6 +10,7 @@
       <img src='{{user.avatar}}' class="thumbnail">
       <p>Username: {{user.username}}</p>
       <p>Email: {{user.email}}</p>
+      <p>Member since: {{user.created}}</p>
       <p>Polls: {{user.polls}}</p>
     </div>
   </div>

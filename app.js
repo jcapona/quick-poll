@@ -25,6 +25,14 @@ var UserSchema = new mongoose.Schema({
 });
 var User = mongoose.model('users', UserSchema);
 
+var PollSchema = new mongoose.Schema({
+    username: {type: String, unique: true, index: true},
+    title: {type: String, required: true},
+    created: { type: Date, default: Date.now },
+});
+var Poll = mongoose.model('polls', PollSchema);
+
+
 ///////////////////////////////////////
 ///////////////////////////////////////
 
@@ -79,7 +87,7 @@ app.get('/signin', function (req, res) {
 });
 
 app.post('/login', passport.authenticate('local', {
-    successRedirect: '/',
+    successRedirect: '/dashboard',
     failureRedirect: '/signin'
   })
 );
@@ -102,7 +110,7 @@ app.post('/signup', function(req, res, next) {
           return res.redirect('/signin');
         }
         passport.authenticate('local')(req, res, function () {
-          res.redirect('/');
+          res.redirect('/dashboard');
         });
       });
 });
@@ -119,7 +127,10 @@ app.get('/users/:usr', function (req, res) {
 });
 
 app.get('/dashboard', function (req, res) {
-    res.render('users', {user: req.user});
+    Poll.find({username: req.user.username}, function(err, polls) {
+      console.log(polls);
+      res.render('dashboard', {user: req.user, poll: polls}); 
+    });
 });
 
 
@@ -127,6 +138,26 @@ app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
+
+
+app.post('/createPoll', function(req, res, next) {
+
+    var poll = new Poll({
+        username: req.user.username,
+        title : req.body.title,
+    }).save(function (err, newPoll) {
+        if(err)
+        {
+          console.log(err);
+          return res.redirect('/dashboard');
+        }
+        else
+          res.redirect('/');
+      });
+});
+
+
+
 
 app.listen(process.env.PORT || 5000);
 
