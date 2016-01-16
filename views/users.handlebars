@@ -1,10 +1,20 @@
 <!-- views/home.handlebars -->
 {{#if user}}
-    <p>Username: {{user.username}}</p>
-    <p>Email: {{user.email}}</p>
-    <p>Avatar: <img src='{{user.avatar}}'></p>
-    <p>Polls: {{user.polls}}</p>
+<div class="container">
+  <h1 class="text-center">{{user.username}}</h1>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Dashboard</h3>
+    </div>
+    <div class="panel-body">
+      <img src='{{user.avatar}}' class="thumbnail">
+      <p>Username: {{user.username}}</p>
+      <p>Email: {{user.email}}</p>
+      <p>Polls: {{user.polls}}</p>
+    </div>
+  </div>
+</div>
 {{else}}
-    <p> User doesnt exist</p>
+     <h1 class="text-center">There's nothing here!</h1>
 {{/if}}
 
