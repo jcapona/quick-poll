@@ -8,10 +8,7 @@ app.engine('handlebars', hbs.engine);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
 
-
-///////////////////////////////////////
-// DB
-///////////////////////////////////////
+// Mongo DB 
 var mongoose = require('mongoose');
 mongoose.connect("mongodb://example:example@ds045785.mongolab.com:45785/quick-poll");
 
@@ -26,16 +23,25 @@ var UserSchema = new mongoose.Schema({
 var User = mongoose.model('users', UserSchema);
 
 var PollSchema = new mongoose.Schema({
-    username: {type: String, unique: true, index: true},
+    username: {type: String, required: true},
     title: {type: String, required: true},
     created: { type: Date, default: Date.now },
 });
 var Poll = mongoose.model('polls', PollSchema);
 
+var QuestionSchema = new mongoose.Schema({
+    poll_id: {type: String, required: true},
+    title: {type: String, required: true},
+    type: {type: String, required: true}
+});
+var Question = mongoose.model('questions', QuestionSchema);
 
-///////////////////////////////////////
-///////////////////////////////////////
-
+var AnswerSchema = new mongoose.Schema({
+    poll_id: {type: String, required: true},
+    question_id: {type: String, required: true},
+    text: {type: String, required: true}
+});
+var Answer = mongoose.model('answers-all', QuestionSchema);
 
 // Auth strategy
 var passport = require('passport')
@@ -56,7 +62,6 @@ passport.use(new LocalStrategy(
   }
 ));
 
-
 // App configuration
 app.configure(function() {
   app.use(express.static('public'));
@@ -76,7 +81,6 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
-
 // Routes 
 app.get('/', function (req, res) {
   res.render('home', {user: req.user});
@@ -91,6 +95,33 @@ app.post('/login', passport.authenticate('local', {
     failureRedirect: '/signin'
   })
 );
+
+app.get('/edit', function(req,res){
+  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+      if(err)
+        return done(err);
+      if (!poll)
+        res.render('/dashboard');
+      else 
+      {
+        res.render('edit', {poll: poll});
+      }
+    });
+});
+
+app.get('/view', function(req,res){
+  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+      if(err)
+        return done(err);
+      if (!poll)
+        res.render('/');
+      else 
+      {
+        res.render('view', {poll: poll});
+      }
+    });
+});
+
 
 app.post('/signup', function(req, res, next) {
     var password = req.body.password;
@@ -127,8 +158,9 @@ app.get('/users/:usr', function (req, res) {
 });
 
 app.get('/dashboard', function (req, res) {
+    if(req.user == undefined)
+      return res.redirect('/signin');
     Poll.find({username: req.user.username}, function(err, polls) {
-      console.log(polls);
       res.render('dashboard', {user: req.user, poll: polls}); 
     });
 });
@@ -144,7 +176,7 @@ app.post('/createPoll', function(req, res, next) {
 
     var poll = new Poll({
         username: req.user.username,
-        title : req.body.title,
+        title : req.body.title
     }).save(function (err, newPoll) {
         if(err)
         {
@@ -152,10 +184,66 @@ app.post('/createPoll', function(req, res, next) {
           return res.redirect('/dashboard');
         }
         else
-          res.redirect('/');
+          res.render('create', {poll: newPoll});
       });
 });
 
+app.post('/newQuestion', function(req, res) {
+    var question = new Question({
+      poll_id: req.body.poll_id,
+      title: req.body.title,
+      type: req.body.type
+    }).save(function(err, newQuestion){
+      if(err)
+        {
+          console.log("error saving question");
+          console.log(err);
+          return res.redirect('/dashboard');
+        }
+        else
+        {
+          console.log("question saved");
+          console.log(newQuestion);
+          return res.redirect('/dashboard')
+        }
+      });
+});
+
+app.post('/newAnswer', function(req, res) {
+  var answer = new Answer({
+    poll_id: req.body.poll_id,
+    question_id: req.body.q_id,
+    text: req.body.text
+  }).save(function(err,newAnswer){
+    if(err)
+    {
+      console.log(err);
+      return res.redirect('/dashboard');
+    }
+    else
+    {
+      return res.redirect('/dashboard')
+    }
+  })
+});
+
+app.post('/delete', function(req, res) {
+  var answer = new Answer({
+    poll_id: req.body.poll_id,
+    question_id: req.body.q_id,
+    text: req.body.text
+  }).save(function(err,newAnswer){
+    if(err)
+    {
+      console.log(err);
+      return res.redirect('/dashboard');
+    }
+    else
+    {
+      return res.render('/dashboard')
+    }
+  })
+});
 
 
 

@@ -29,12 +29,38 @@
     </div>
 
     <div class="panel-body">
-      <div class="container" id="new-poll">
-        <ul>
+      <div id="new-poll">
+        <table>
           {{#each poll}}
-            <li>{{this.title}}</li>
+            <tr>
+              <td class="poll-title">{{this.title}}</td>
+              <td class="poll-btns">
+                <form action="/edit" method="get">
+                  <div class="form-group">
+                    <input class="hidden" name="pid" value={{this._id}}>
+                    <input type="submit" value="Edit" class="form-control">
+                  </div>
+                </form>
+              </td>
+              <td class="poll-btns">
+                <form action="/view" method="get">
+                  <div class="form-group">
+                    <input class="hidden" name="pid" value={{this._id}}>
+                    <input type="submit" value="View" class="form-control">
+                  </div>
+                </form>
+              </td>
+              <td class="poll-btns">
+                <form action="/delete" method="get">
+                  <div class="form-group">
+                    <input class="hidden" name="pid" value={{this._id}}>
+                    <input type="submit" value="Delete" class="form-control">
+                  </div>
+                </form>
+              </td>
+            </tr>
           {{/each}}
-        </ul>
+        </table>
       </div>
     </div>
   </div>
@@ -46,7 +72,7 @@
     </div>
 
     <div class="panel-body">
-      <div class="container" id="new-poll">
+      <div id="new-poll">
         <form action="/createPoll" method="post">
           <div class="form-group">
               <label>Title:</label>
