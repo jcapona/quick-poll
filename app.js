@@ -41,7 +41,7 @@ var AnswerSchema = new mongoose.Schema({
     question_id: {type: String, required: true},
     text: {type: String, required: true}
 });
-var Answer = mongoose.model('answers-all', QuestionSchema);
+var Answer = mongoose.model('answers-all', AnswerSchema);
 
 // Auth strategy
 var passport = require('passport')
@@ -197,14 +197,11 @@ app.post('/newQuestion', function(req, res) {
       if(err)
         {
           console.log("error saving question");
-          console.log(err);
-          return res.redirect('/dashboard');
+          return console.error(err);
         }
         else
         {
-          console.log("question saved");
-          console.log(newQuestion);
-          return res.redirect('/dashboard')
+          return res.json(newQuestion._id);
         }
       });
 });
@@ -222,27 +219,14 @@ app.post('/newAnswer', function(req, res) {
     }
     else
     {
-      return res.redirect('/dashboard')
+      return res.json(newAnswer)
     }
   })
+
 });
 
 app.post('/delete', function(req, res) {
-  var answer = new Answer({
-    poll_id: req.body.poll_id,
-    question_id: req.body.q_id,
-    text: req.body.text
-  }).save(function(err,newAnswer){
-    if(err)
-    {
-      console.log(err);
-      return res.redirect('/dashboard');
-    }
-    else
-    {
-      return res.render('/dashboard')
-    }
-  })
+
 });
 
 
