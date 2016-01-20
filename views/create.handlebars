@@ -1,49 +1,58 @@
 <!-- views/view.handlebars -->
 {{#if poll}}
   <h1>{{poll.title}}</h1>
-  <h2>Set Question</h2>
-  <form id="newQuestion">
-    <div class="form-group">
-      <input class="hidden" name="poll_id" value={{poll._id}}>
-      <input type="text" name="title" class="form-control" placeholder="Write your question">
-      <div class="radio">
-        <label>
-          <input type="radio" name="type" id="singleChoice" checked>
-          Single choice 
-        </label>
+
+  <div id="question-section">
+    <h2>Set Question</h2>
+    <form id="question">
+      <div class="form-group">
+        <input class="hidden" name="poll_id" value={{poll._id}}>
+        <input type="text" name="title" class="form-control" placeholder="Write your question">
+        <div class="radio">
+          <label>
+            <input type="radio" name="type" id="singleChoice" checked>
+            Single choice 
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="type" id="multipleChoice" disabled>
+            Multiple choice
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="type" id="range" disabled>
+            Range selection
+          </label>
+        </div>
+        <input type="submit" value="Save" class="form-control">
       </div>
-      <div class="radio">
-        <label>
-          <input type="radio" name="type" id="multipleChoice" disabled>
-          Multiple choice
-        </label>
-      </div>
-      <div class="radio">
-        <label>
-          <input type="radio" name="type" id="range" disabled>
-          Range selection
-        </label>
-      </div>
-      <input type="submit" value="Save" class="form-control">
-    </div>
-  </form>
-  
+    </form>
+  </div>
+
   <div><span id="resp"></span></div>
 
-  <div class="hidden" id="section-answers">
+  <div class="hidden" id="answers-section">
     <h2>Set the possible answers</h2>
     <form id="answers">
       <div class="form-group">
-        <input class="hidden" name="poll_id" value={{poll._id}}>
-        <input class="hidden" name="text" value="asdasdad">
-        <button id="add_option" class="btn">Add Option</button>
-        <div class="form-group">
-          <input type="text" class="form-control ans" placeholder="Option" name="1">
-        </div>
-        <span id="added"></span>
         <button type="submit" class="btn btn-default">Submit</button>
+        <button id="add_option" class="btn btn-default">Add Option</button>
+        <input class="hidden" name="poll_id" value={{poll._id}}>
+        <input class="hidden" name="text" value="test-input">
+        <input type="text" class="form-control ans" placeholder="Option" name="1">
+        <input type="text" class="form-control ans" placeholder="Option" name="2">
+        <span id="added"></span>
       </div> 
     </form>
+  </div>
+
+  <div class="hidden" id="decission-section">
+    <h2>Question added!</h2>
+    <h3>What do you wanna do now?</h3>
+    <button class="btn btn-default" id="add-question">Add question</button>
+    <button class="btn btn-default" id="finish-poll">Finish poll</button>
   </div>
 
 {{else}}
@@ -53,70 +62,82 @@
 <script type="text/javascript">
  $(document).ready(function() {
 
-    $("#newQuestion").on('submit',function(e)
-    {
-      e.stopPropagation();
-      e.preventDefault();
 
-      $.ajax({
-            url: '/newQuestion',
-            type: 'POST',
-            data: $("#newQuestion").serialize(),
-            error: function(jqXHR, textStatus, errorThrown) {
-              alert('Error: ' + textStatus);
-            },
-            success: function(data) {
-              $("#added").append('<input class="hidden" name="q_id" value="'+data+'">');
-              $("#section-answers").removeClass("hidden");
-            }
-      });
-    });
+  $("#question").on('submit',function(e)
+  {
+    e.stopPropagation();
+    e.preventDefault();
 
-    // To add dynamically new options when asked by user
-    var max_fields = 15; //maximum input boxes allowed
-    
-    var x = 1;
-    $("#add_option").click(function(e){
-        e.preventDefault();
-        if(x < max_fields){
-            x++;
-            $("#added").append('<div class="form-group"><input type="text" class="form-control ans" placeholder="Option" name="'+(x).toString()+'"><a href="#" class="remove_field">Remove</a></div>');
-        }
-    });
-    
-    $("#answers").on("click", ".remove_field", function(e){
-        e.preventDefault(); 
-        $(this).parent('div').remove(); 
-        x--;
-    })
-
-
-    $("#answers").on('submit',function(e)
-    {
-      var answers = [];
-      $.each($('.ans'), function() {
-        answers.push($(this).val());
-      });
-
-      if(answers.length == 0) {
-        answers = "none";
+    $.ajax({
+      url: '/newQuestion',
+      type: 'POST',
+      data: $("#question").serialize(),
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert('Error: ' + textStatus);
+      },
+      success: function(data) {
+        $("#added").append('<input class="hidden" name="q_id" value="'+data+'">');
+        $("#answers-section").removeClass("hidden");
+        $("#question-section").addClass("hidden");
       }
-      e.stopPropagation();
-      e.preventDefault();
+    });
+  });
 
-      $.ajax({
-            url: '/newAnswer',
-            type: 'POST',
-            data: $("#answers").serialize(),
-            error: function(jqXHR, textStatus, errorThrown) {
-              alert('Error: ' + textStatus);
-            },
-            success: function(data) {
-              
-            }
-      });
+  // To add dynamically new options when asked by user
+  var max_fields = 15; //maximum input boxes allowed
+  
+  var x = 2;
+  $("#add_option").click(function(e){
+    e.preventDefault();
+    if(x < max_fields){
+      x++;
+      $("#added").append('<div class="input-group"><input type="text" class="form-control ans" placeholder="Option" name="'+(x).toString()+'"><span class="input-group-btn"><button class="btn btn-default remove_field" type="button"><i class="fa fa-times"></i></button></span></div>');
+    }
+  });
+  
+  $("#answers").on("click", ".remove_field", function(e){
+    e.preventDefault(); 
+    $(this).parent().parent('div').remove(); 
+    x--;
+  })
+
+
+  $("#answers").on('submit',function(e)
+  {
+    var answers = [];
+    $.each($('.ans'), function() {
+      answers.push($(this).val());
     });
 
+    if(answers.length == 0) {
+      answers = "none";
+    }
+    e.stopPropagation();
+    e.preventDefault();
+
+    $.ajax({
+      url: '/newAnswer',
+      type: 'POST',
+      data: $("#answers").serialize(),
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert('Error: ' + textStatus);
+      },
+      success: function(data) {
+        $("#decission-section").removeClass("hidden");
+        $("#answers-section").addClass("hidden");
+      }
+    });
+  });
+
+  $("#add-question").on("click",function(){
+    //TODO: clear forms
+    $("#decission-section").addClass("hidden");
+    $("#answer-section").addClass("hidden");
+    $("#question-section").removeClass("hidden");
+  });
+  $("#finish-poll").on("click",function(){
+    //Reload page?
+  });
 
 });
 </script>
