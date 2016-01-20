@@ -1,6 +1,6 @@
 <!-- views/profile.handlebars -->
-  <div class="jumbotron">
-    <h1>Dashboard</h1>
+  <div class="page-header">
+    <h1>Dashboard <small>Manage your polls!</small></h1>
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -10,10 +10,10 @@
     <div class="panel-body">
       <div class="row">
         <div class="col-md-3">
-          <img src="{{user.avatar}}"/>
+          <a href="#" class="thumbnail"><img src="{{user.avatar}}" class="img-responsive"></a>
         </div>
         <div class="col-md-9">
-          <p>Username: {{user.username}}</p>
+          <h2>{{user.username}}</h2>
           <p>E-Mail: {{user.email}}</p>
           <p>Member since: {{user.created}}</p>
           <p>Polls created: {{user.polls}}</p>
@@ -30,37 +30,35 @@
 
     <div class="panel-body">
       <div id="new-poll">
-        <table>
-          {{#each poll}}
-            <tr>
-              <td class="poll-title">{{this.title}}</td>
-              <td class="poll-btns">
-                <form action="/edit" method="get">
-                  <div class="form-group">
-                    <input class="hidden" name="pid" value={{this._id}}>
-                    <input type="submit" value="Edit" class="form-control">
-                  </div>
-                </form>
-              </td>
-              <td class="poll-btns">
-                <form action="/view" method="get">
-                  <div class="form-group">
-                    <input class="hidden" name="pid" value={{this._id}}>
-                    <input type="submit" value="View" class="form-control">
-                  </div>
-                </form>
-              </td>
-              <td class="poll-btns">
-                <form action="/delete" method="get">
-                  <div class="form-group">
-                    <input class="hidden" name="pid" value={{this._id}}>
-                    <input type="submit" value="Delete" class="form-control">
-                  </div>
-                </form>
-              </td>
-            </tr>
-          {{/each}}
-        </table>
+        {{#each poll}}
+        <div class="row">
+          <div class="col-md-9">{{this.title}}</div>
+          <div class="col-md-1">
+            <form action="/edit" method="get">
+              <div class="form-group">
+                <input class="hidden" name="pid" value={{this._id}}>
+                <input type="submit" value="Edit" class="form-control ṕoll-btn">
+              </div>
+            </form>
+          </div>  
+          <div class="col-md-1">
+            <form action="/view" method="get">
+              <div class="form-group">
+                <input class="hidden" name="pid" value={{this._id}}>
+                <input type="submit" value="View" class="form-control ṕoll-btn">
+              </div>
+            </form>
+          </div>
+          <div class="col-md-1">
+            <form action="/delete" method="get">
+              <div class="form-group">
+                <input class="hidden" name="pid" value={{this._id}}>
+                <input type="submit" value="Delete" class="form-control ṕoll-btn">
+              </div>
+            </form>
+          </div>  
+        </div>
+        {{/each}}
       </div>
     </div>
   </div>
