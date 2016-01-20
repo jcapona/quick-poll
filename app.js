@@ -110,17 +110,44 @@ app.get('/signin', function (req, res) {
 });
 
 // Logs user in
-app.post('/login', passport.authenticate('local', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/signin'
-  })
-);
+app.post('/login', function(req, res) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err)
+    { 
+      res.redirect("/signin");
+      req.session.error = "Error while logging in.";
+
+    }
+    else if(!user)
+    {
+      res.redirect("/signin");
+      req.session.error = "No such user.";
+    }
+
+    req.logIn(user, function(err)
+    {
+      if(err)
+      {
+        res.redirect("/signin");
+        req.session.error = "Error while logging in";
+      }
+      else
+      {
+        res.redirect('/dashboard');
+        req.session.success = "Welcome back!";
+      }
+    });
+  })(req, res);
+});
 
 // Allows to edit questions & answers from a certain poll
 app.get('/edit', function(req,res){
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
       if(err)
+      {
+        req.session.error = err;
         return done(err);
+      }
       if (!poll)
         res.render('/dashboard');
       else 
@@ -136,7 +163,10 @@ app.get('/view', function(req,res){
   //Checks if pid query param exists in DB
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
+    {
+      req.session.error = err;
       return done(err);
+    }
     if (!poll)
       res.render('/');
     else 
@@ -162,6 +192,7 @@ app.post('/signup', function(req, res, next) {
         if(err)
         {
           console.log(err);
+          req.session.error = err;
           return res.redirect('/signin');
         }
         passport.authenticate('local')(req, res, function () {
@@ -187,6 +218,8 @@ app.get('/dashboard', function (req, res) {
     if(req.user == undefined)
     {
       res.redirect('/signin');
+      req.session.error = "You must be logged in to use the dashboard";
+      
     }
     else
     {
@@ -227,14 +260,15 @@ app.post('/newQuestion', function(req, res) {
       type: req.body.type
     }).save(function(err, newQuestion){
       if(err)
-        {
-          return console.error(err);
-        }
-        else
-        {
-          return res.json(newQuestion._id);
-        }
-      });
+      {
+        req.session.error = err;
+        //return console.error(err);
+      }
+      else
+      {
+        return res.json(newQuestion._id);
+      }
+    });
 });
 
 // Saves new set of answers to db
@@ -267,6 +301,8 @@ app.post('/delete', function(req, res) {
     else 
     {
       // Performs the delete
+
+      req.session.notce = "Poll deleted successfully";
     }
   });
 });
