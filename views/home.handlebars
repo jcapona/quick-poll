@@ -1,7 +1,15 @@
 <!-- views/home.handlebars -->
+<div class="jumbotron">
+  <h1>Welcome!</h1>
+  <h3>Blah blah</h3>
+  <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
+</div>
+
+<div class="jumbotron">
 {{#if user}}
-    <p>Username: {{user.username}}</p>
+    <p>Welcome {{user.username}}!</p>
+    <p>What do you wanna do?</p>
 {{else}}
     <p> Not signed in</p>
 {{/if}}
-
+</div>

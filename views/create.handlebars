@@ -39,8 +39,6 @@
       <div class="form-group">
         <button type="submit" class="btn btn-default">Submit</button>
         <button id="add_option" class="btn btn-default">Add Option</button>
-        <input class="hidden" name="poll_id" value={{poll._id}}>
-        <input class="hidden" name="text" value="test-input">
         <input type="text" class="form-control ans" placeholder="Option" name="1">
         <input type="text" class="form-control ans" placeholder="Option" name="2">
         <span id="added"></span>
@@ -61,31 +59,23 @@
 
 <script type="text/javascript">
  $(document).ready(function() {
-
+  var form = {};  
 
   $("#question").on('submit',function(e)
   {
     e.stopPropagation();
     e.preventDefault();
 
-    $.ajax({
-      url: '/newQuestion',
-      type: 'POST',
-      data: $("#question").serialize(),
-      error: function(jqXHR, textStatus, errorThrown) {
-        alert('Error: ' + textStatus);
-      },
-      success: function(data) {
-        $("#added").append('<input class="hidden" name="q_id" value="'+data+'">');
-        $("#answers-section").removeClass("hidden");
-        $("#question-section").addClass("hidden");
-      }
-    });
+    form.pid = $("#question").find('input[name="poll_id"]').val();
+    form.question = $("#question").find('input[name="title"]').val();
+    form.type = 1;
+    
+    $("#answers-section").removeClass("hidden");
+    $("#question-section").addClass("hidden");
   });
 
   // To add dynamically new options when asked by user
   var max_fields = 15; //maximum input boxes allowed
-  
   var x = 2;
   $("#add_option").click(function(e){
     e.preventDefault();
@@ -115,28 +105,33 @@
     e.stopPropagation();
     e.preventDefault();
 
+    form.answers = answers;
+    
     $.ajax({
-      url: '/newAnswer',
+      url: '/newQuestion',
       type: 'POST',
-      data: $("#answers").serialize(),
+      dataType: 'json',
+      data: form,
       error: function(jqXHR, textStatus, errorThrown) {
         alert('Error: ' + textStatus);
       },
       success: function(data) {
         $("#decission-section").removeClass("hidden");
-        $("#answers-section").addClass("hidden");
+        $("#answers-section").addClass("hidden"); 
       }
     });
   });
 
   $("#add-question").on("click",function(){
-    //TODO: clear forms
+    document.getElementById("question").reset();
+    document.getElementById("answers").reset();
     $("#decission-section").addClass("hidden");
     $("#answer-section").addClass("hidden");
     $("#question-section").removeClass("hidden");
   });
+
   $("#finish-poll").on("click",function(){
-    //Reload page?
+    window.location.href = "/dashboard";
   });
 
 });

@@ -8,6 +8,8 @@ app.engine('handlebars', hbs.engine);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
 
+
+
 // Mongo DB 
 var mongoose = require('mongoose');
 mongoose.connect("mongodb://example:example@ds045785.mongolab.com:45785/quick-poll");
@@ -42,6 +44,8 @@ var AnswerSchema = new mongoose.Schema({
     text: {type: String, required: true}
 });
 var Answer = mongoose.model('answers-all', AnswerSchema);
+
+
 
 // Auth strategy
 var passport = require('passport')
@@ -254,41 +258,39 @@ app.post('/createPoll', function(req, res, next) {
 
 // Saves new question to db
 app.post('/newQuestion', function(req, res) {
+    var formData = req.body;
+
     var question = new Question({
-      poll_id: req.body.poll_id,
-      title: req.body.title,
-      type: req.body.type
+      poll_id: formData.pid,
+      title: formData.question,
+      type: formData.type
     }).save(function(err, newQuestion){
       if(err)
       {
         req.session.error = err;
-        //return console.error(err);
       }
       else
       {
-        return res.json(newQuestion._id);
+        var answer = new Answer({
+          poll_id: formData.pid,
+          question_id: newQuestion._id,
+          text: formData.answers
+        }).save(function(err,newAnswer){
+          if(err)
+          {
+            console.error(err);
+            req.session.error = err;
+            return err;
+          }
+          else
+          {
+            req.session.notice = "Poll successfully saved";
+            return res.json(formData.pid);
+
+          }
+        })
       }
     });
-});
-
-// Saves new set of answers to db
-app.post('/newAnswer', function(req, res) {
-  var answer = new Answer({
-    poll_id: req.body.poll_id,
-    question_id: req.body.q_id,
-    text: req.body.text
-  }).save(function(err,newAnswer){
-    if(err)
-    {
-      console.log(err);
-      return res.redirect('/dashboard');
-    }
-    else
-    {
-      return res.json(newAnswer)
-    }
-  })
-
 });
 
 // Deletes poll from DB (poll+answers-all+answer-selected)
@@ -302,7 +304,7 @@ app.post('/delete', function(req, res) {
     {
       // Performs the delete
 
-      req.session.notce = "Poll deleted successfully";
+      req.session.notice = "Poll deleted successfully";
     }
   });
 });
