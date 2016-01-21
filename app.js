@@ -193,8 +193,10 @@ app.get('/view', function(req,res){
           */
           pollData.question.push(quest);
         }
-        res.contentType('application/json');
-        res.send(JSON.stringify(pollData,null,2));
+        //res.contentType('application/json');
+        //res.send(JSON.stringify(pollData,null,2));
+        //console.log(JSON.stringify(pollData));
+        res.render('view', {poll: pollData});
       })
     }
   });
