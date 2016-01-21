@@ -34,17 +34,10 @@ var Poll = mongoose.model('polls', PollSchema);
 var QuestionSchema = new mongoose.Schema({
     poll_id: {type: String, required: true},
     title: {type: String, required: true},
-    type: {type: String, required: true}
+    type: {type: String, required: true},
+    answers: [{type: String, required: true}]
 });
 var Question = mongoose.model('questions', QuestionSchema);
-
-var AnswerSchema = new mongoose.Schema({
-    poll_id: {type: String, required: true},
-    question_id: {type: String, required: true},
-    text: {type: String, required: true}
-});
-var Answer = mongoose.model('answers-all', AnswerSchema);
-
 
 
 // Auth strategy
@@ -164,7 +157,7 @@ app.get('/edit', function(req,res){
 // Shows a poll
 // Must return a JSON with question + possible answers
 app.get('/view', function(req,res){
-  //Checks if pid query param exists in DB
+  var pollData = {};
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
     {
@@ -172,13 +165,42 @@ app.get('/view', function(req,res){
       return done(err);
     }
     if (!poll)
+    {
       res.render('/');
+      req.session.error = "That poll doesn't exist.";
+    }
     else 
     {
-      res.render('view', {poll: poll});
+      pollData.title = poll.title;
+      pollData.question = [];
+      Question.find({poll_id: poll._id},function(err,question){
+        if(err)
+        {
+          console.error(err);
+          req.session.error = err;
+          return res.redirect('/');
+        }
+        for (var i in question)
+        {
+          var quest = {};
+          quest.title = question[i].title;
+          quest.answer = question[i].answers;
+          /*
+          for(var j in question[i].answers)
+          {
+            quest.answer.push( question[i].answers[j] ;
+          }
+          */
+          pollData.question.push(quest);
+        }
+        res.contentType('application/json');
+        res.send(JSON.stringify(pollData,null,2));
+      })
     }
   });
 });
+
+
 
 // Signs up user to system and logs him in inmediatly
 app.post('/signup', function(req, res, next) {
@@ -263,7 +285,8 @@ app.post('/newQuestion', function(req, res) {
     var question = new Question({
       poll_id: formData.pid,
       title: formData.question,
-      type: formData.type
+      type: formData.type,
+      answers: formData.answers
     }).save(function(err, newQuestion){
       if(err)
       {
@@ -271,24 +294,8 @@ app.post('/newQuestion', function(req, res) {
       }
       else
       {
-        var answer = new Answer({
-          poll_id: formData.pid,
-          question_id: newQuestion._id,
-          text: formData.answers
-        }).save(function(err,newAnswer){
-          if(err)
-          {
-            console.error(err);
-            req.session.error = err;
-            return err;
-          }
-          else
-          {
-            req.session.notice = "Poll successfully saved";
-            return res.json(formData.pid);
-
-          }
-        })
+        req.session.notice = "Poll successfully saved";
+        return res.json(formData.pid);
       }
     });
 });
