@@ -5,13 +5,14 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="User Authentication">
-  <meta name="author" content="">
+  <meta name="author" content="Jorge Capona">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
   
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="stail.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <link rel="stylesheet" type="text/css" href="style.css">
 
   <title>User Authentication</title>  
 </head>
@@ -27,7 +28,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">MyApp</a>
+      <a class="navbar-brand" href="/">Quick-Poll</a>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -36,9 +37,9 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi {{user.username}}!!<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/dashboard"><i class="fa fa-tachometer"></i> Dashboard</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/logout"><i class="fa fa-power-off"></i> Logout</a></li>
           </ul>
         </li>
       </ul>
@@ -52,9 +53,24 @@
   </div>
 </nav>
 
-<div class="container-fluid"> 
+<div class="container">
+
+  {{#if error}}
+    <div class="alert alert-danger" role="alert"><p>{{error}}</p></div>
+  {{/if}}
+
+  {{#if success}}
+    <div class="alert alert-success" role="alert"><p>{{success}}</p></div>
+  {{/if}}
+
+  {{#if notice}}
+    <div class="alert alert-info" role="alert"><p>{{notice}}</p></div>
+  {{/if}}
+
+
   {{{body}}}
 </div>
+
 </body>
 </html>
 

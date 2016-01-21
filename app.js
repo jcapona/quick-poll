@@ -63,15 +63,34 @@ passport.use(new LocalStrategy(
 ));
 
 // App configuration
-app.configure(function() {
-  app.use(express.static('public'));
-  app.use(express.cookieParser());
-  app.use(express.bodyParser());
-  app.use(express.session({ secret: 'keyboard cat' }));
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(app.router);
+app.use(express.static(__dirname + '/public'));
+app.use(express.cookieParser());
+app.use(express.bodyParser());
+app.use(express.session({ secret: 'keyboard cat' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Send messages to view
+app.use(function(req, res, next){
+  var err = req.session.error;
+  var msg = req.session.notice;
+  var success = req.session.success;
+
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
+
+  if(err)
+    res.locals.error = err;
+  if(msg) 
+    res.locals.notice = msg;
+  if(success) 
+    res.locals.success = success;
+
+  next();
 });
+app.use(app.router);
+
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -90,12 +109,14 @@ app.get('/signin', function (req, res) {
   res.render('signin');
 });
 
+// Logs user in
 app.post('/login', passport.authenticate('local', {
     successRedirect: '/dashboard',
     failureRedirect: '/signin'
   })
 );
 
+// Allows to edit questions & answers from a certain poll
 app.get('/edit', function(req,res){
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
       if(err)
@@ -109,20 +130,23 @@ app.get('/edit', function(req,res){
     });
 });
 
+// Shows a poll
+// Must return a JSON with question + possible answers
 app.get('/view', function(req,res){
+  //Checks if pid query param exists in DB
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
-      if(err)
-        return done(err);
-      if (!poll)
-        res.render('/');
-      else 
-      {
-        res.render('view', {poll: poll});
-      }
-    });
+    if(err)
+      return done(err);
+    if (!poll)
+      res.render('/');
+    else 
+    {
+      res.render('view', {poll: poll});
+    }
+  });
 });
 
-
+// Signs up user to system and logs him in inmediatly
 app.post('/signup', function(req, res, next) {
     var password = req.body.password;
     var username = req.body.username;
@@ -146,6 +170,7 @@ app.post('/signup', function(req, res, next) {
       });
 });
 
+// Display basic user profile info
 app.get('/users/:usr', function (req, res) {
     User.findOne({ username: req.params.usr }, function (err, user) {
       if(err)
@@ -157,37 +182,44 @@ app.get('/users/:usr', function (req, res) {
     });
 });
 
+// Displays user's dashboard
 app.get('/dashboard', function (req, res) {
     if(req.user == undefined)
-      return res.redirect('/signin');
-    Poll.find({username: req.user.username}, function(err, polls) {
-      res.render('dashboard', {user: req.user, poll: polls}); 
-    });
+    {
+      res.redirect('/signin');
+    }
+    else
+    {
+      Poll.find({username: req.user.username}, function(err, polls) {
+        res.render('dashboard', {user: req.user, poll: polls}); 
+      });
+    }
 });
 
-
+// Logs out from session
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
+  req.session.notice = "You have successfully been logged out!";
 });
 
-
+// Creates new poll in db
 app.post('/createPoll', function(req, res, next) {
-
-    var poll = new Poll({
-        username: req.user.username,
-        title : req.body.title
-    }).save(function (err, newPoll) {
-        if(err)
-        {
-          console.log(err);
-          return res.redirect('/dashboard');
-        }
-        else
-          res.render('create', {poll: newPoll});
-      });
+  var poll = new Poll({
+    username: req.user.username,
+    title : req.body.title
+  }).save(function (err, newPoll) {
+    if(err)
+    {
+      console.log(err);
+      return res.redirect('/dashboard');
+    }
+    else
+      res.render('create', {poll: newPoll});
+  });
 });
 
+// Saves new question to db
 app.post('/newQuestion', function(req, res) {
     var question = new Question({
       poll_id: req.body.poll_id,
@@ -196,7 +228,6 @@ app.post('/newQuestion', function(req, res) {
     }).save(function(err, newQuestion){
       if(err)
         {
-          console.log("error saving question");
           return console.error(err);
         }
         else
@@ -206,6 +237,7 @@ app.post('/newQuestion', function(req, res) {
       });
 });
 
+// Saves new set of answers to db
 app.post('/newAnswer', function(req, res) {
   var answer = new Answer({
     poll_id: req.body.poll_id,
@@ -225,11 +257,19 @@ app.post('/newAnswer', function(req, res) {
 
 });
 
+// Deletes poll from DB (poll+answers-all+answer-selected)
 app.post('/delete', function(req, res) {
-
+  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+    if(err)
+      return done(err);
+    if (!poll)
+      res.render('/dashboard');
+    else 
+    {
+      // Performs the delete
+    }
+  });
 });
-
-
 
 app.listen(process.env.PORT || 5000);
 
