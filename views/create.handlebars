@@ -96,7 +96,7 @@
   {
     var answers = [];
     $.each($('.ans'), function() {
-      answers.push($(this).val());
+      answers.push($(this).val().toString());
     });
 
     if(answers.length == 0) {
