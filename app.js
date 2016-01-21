@@ -302,19 +302,44 @@ app.post('/newQuestion', function(req, res) {
 
 // Deletes poll from DB (poll+answers-all+answer-selected)
 app.post('/delete', function(req, res) {
-  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+  Question.findOne({ poll_id : req.body.pid}, function(err,question){
     if(err)
       return done(err);
-    if (!poll)
-      res.render('/dashboard');
-    else 
+    else if(question == null)
     {
-      // Performs the delete
-
-      req.session.notice = "Poll deleted successfully";
+      res.redirect('/dashboard');
+      req.session.error = "The poll is already deleted";
     }
+    else
+      question.remove(function(err){
+        if(err)
+          return done(err); 
+        else
+        {
+          Poll.findOne({ _id : req.body.pid}, function(err,poll){
+              if(err)
+                  return done(err);
+              else if(question == null)
+              {
+                res.redirect('/dashboard');
+                req.session.error = "The poll is already deleted";
+              }
+              else
+                poll.remove(function(err){
+                  if(err)
+                    return done(err); 
+                  else
+                  {
+                    res.redirect('/dashboard');
+                    req.session.notice = "Poll deleted successfully";
+                  }
+                });
+          });
+        }
+      });
   });
-});
+  });
+
 
 app.listen(process.env.PORT || 5000);
 
