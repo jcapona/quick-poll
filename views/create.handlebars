@@ -10,19 +10,19 @@
         <input type="text" name="title" class="form-control" placeholder="Write your question">
         <div class="radio">
           <label>
-            <input type="radio" name="type" id="singleChoice" checked>
+            <input type="radio" name="type" class="form-type" value="radio" checked>
             Single choice 
           </label>
         </div>
         <div class="radio">
           <label>
-            <input type="radio" name="type" id="multipleChoice" disabled>
+            <input type="radio" name="type" class="form-type" value="checkbox">
             Multiple choice
           </label>
         </div>
         <div class="radio">
           <label>
-            <input type="radio" name="type" id="range" disabled>
+            <input type="radio" name="type" class="form-type" value="range" disabled>
             Range selection
           </label>
         </div>
@@ -68,7 +68,9 @@
 
     form.pid = $("#question").find('input[name="poll_id"]').val();
     form.question = $("#question").find('input[name="title"]').val();
-    form.type = 1;
+    form.type = $(".form-type:checked").val();
+
+    console.log(form);
     
     $("#answers-section").removeClass("hidden");
     $("#question-section").addClass("hidden");

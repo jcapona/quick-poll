@@ -138,7 +138,7 @@ app.post('/login', function(req, res) {
 });
 
 // Allows to edit questions & answers from a certain poll
-app.get('/edit', function(req,res){
+app.get('/edit', loggedIn, function(req,res){
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
       if(err)
       {
@@ -166,7 +166,7 @@ app.get('/view', function(req,res){
     }
     if (!poll)
     {
-      res.render('/');
+      res.redirect('/');
       req.session.error = "That poll doesn't exist.";
     }
     else 
@@ -184,18 +184,10 @@ app.get('/view', function(req,res){
         {
           var quest = {};
           quest.title = question[i].title;
+          quest.type = question[i].type;
           quest.answer = question[i].answers;
-          /*
-          for(var j in question[i].answers)
-          {
-            quest.answer.push( question[i].answers[j] ;
-          }
-          */
           pollData.question.push(quest);
         }
-        //res.contentType('application/json');
-        //res.send(JSON.stringify(pollData,null,2));
-        //console.log(JSON.stringify(pollData));
         res.render('view', {poll: pollData});
       })
     }
@@ -219,7 +211,7 @@ app.post('/signup', function(req, res, next) {
     }).save(function (err, newUser) {
         if(err)
         {
-          console.log(err);
+          console.error(err);
           req.session.error = err;
           return res.redirect('/signin');
         }
@@ -242,19 +234,10 @@ app.get('/users/:usr', function (req, res) {
 });
 
 // Displays user's dashboard
-app.get('/dashboard', function (req, res) {
-    if(req.user == undefined)
-    {
-      res.redirect('/signin');
-      req.session.error = "You must be logged in to use the dashboard";
-      
-    }
-    else
-    {
-      Poll.find({username: req.user.username}, function(err, polls) {
-        res.render('dashboard', {user: req.user, poll: polls}); 
-      });
-    }
+app.get('/dashboard', loggedIn, function (req, res) {  
+  Poll.find({username: req.user.username}, function(err, polls) {
+    res.render('dashboard', {user: req.user, poll: polls}); 
+  });
 });
 
 // Logs out from session
@@ -264,8 +247,14 @@ app.get('/logout', function(req, res){
   req.session.notice = "You have successfully been logged out!";
 });
 
+// Logs out from session
+app.get('/delUser', loggedIn, function(req, res){
+  res.redirect('/');
+  req.session.notice = "User successfully removed.";
+});
+
 // Creates new poll in db
-app.post('/createPoll', function(req, res, next) {
+app.post('/createPoll', loggedIn, function(req, res, next) {
   var poll = new Poll({
     username: req.user.username,
     title : req.body.title
@@ -303,7 +292,7 @@ app.post('/newQuestion', function(req, res) {
 });
 
 // Deletes poll from DB (poll+answers-all+answer-selected)
-app.post('/delete', function(req, res) {
+app.post('/delete', loggedIn, function(req, res) {
   Question.findOne({ poll_id : req.body.pid}, function(err,question){
     if(err)
       return done(err);
@@ -333,7 +322,7 @@ app.post('/delete', function(req, res) {
                   else
                   {
                     res.redirect('/dashboard');
-                    req.session.notice = "Poll deleted successfully";
+                    req.session.success = "Poll deleted successfully";
                   }
                 });
           });
@@ -345,3 +334,14 @@ app.post('/delete', function(req, res) {
 
 app.listen(process.env.PORT || 5000);
 
+
+// Used to check if user is logged in in some routes
+function loggedIn(req, res, next) {
+  if(req.user) {
+    next();
+  }
+  else {
+    res.redirect('/signin');
+    req.session.notice = "You must be logged in to see this page.";
+  }
+}

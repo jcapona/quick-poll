@@ -1,22 +1,30 @@
 <!-- views/view.handlebars -->
 {{#if poll}}
     <h1>{{poll.title}}</h1>
-	
+	<form>
 	<ol>	
 	{{#poll.question}}
-      <li><p>{{title}}</p></li>
-      <ul>
-      {{#answer}}
-      	<li><p>{{this}}</p></li>
+    <li><p>{{title}}</p></li>
+		{{#answer}}
+	 	<div class="{{../type}}">
+		  <label><input type="{{../type}}" name="{{@../index}}" value="">{{this}}</label>
+		</div>
       {{/answer}}
       </ul>
     {{/poll.question}}
 	</ol>
+	</form>
 {{else}}
     <p>Nothing to see here</p>
 {{/if}}
 
 <!--
-{"title":"teeest","question":[{"title":"q1","answer":["ans1","ans2"]},{"title":"q2","answer":["ans3","ans4"]}]}
-
+{ title: 'bebidas',
+  question: 
+   [ { title: 'fav beb',
+       type: 'singleChoice',
+       answer: ["coca","coca light","pepsi"] },
+     { title: 'fav nums',
+       type: 'multipleChoice',
+       answer: ["1","2","3","4","5"] } ] }
 -->
