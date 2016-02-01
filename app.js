@@ -29,6 +29,7 @@ var PollSchema = new mongoose.Schema({
     title: {type: String, required: true},
     created: { type: Date, default: Date.now },
 });
+PollSchema.index({username: 1, title: 1}, {unique: true});  
 var Poll = mongoose.model('polls', PollSchema);
 
 var QuestionSchema = new mongoose.Schema({
@@ -38,6 +39,14 @@ var QuestionSchema = new mongoose.Schema({
     answers: [{type: String, required: true}]
 });
 var Question = mongoose.model('questions', QuestionSchema);
+
+var AnswerSchema = new mongoose.Schema({
+    poll_id: {type: String, required: true},
+    q_id: {type: String, required: true},
+    answer: {type: String, required: true}
+});
+var Answer = mongoose.model('answers', AnswerSchema);
+
 
 
 // Auth strategy
@@ -139,24 +148,6 @@ app.post('/login', function(req, res) {
 
 // Allows to edit questions & answers from a certain poll
 app.get('/edit', loggedIn, function(req,res){
-  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
-      if(err)
-      {
-        req.session.error = err;
-        return done(err);
-      }
-      if (!poll)
-        res.render('/dashboard');
-      else 
-      {
-        res.render('edit', {poll: poll});
-      }
-    });
-});
-
-// Shows a poll
-// Must return a JSON with question + possible answers
-app.get('/view', function(req,res){
   var pollData = {};
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
@@ -188,13 +179,84 @@ app.get('/view', function(req,res){
           quest.answer = question[i].answers;
           pollData.question.push(quest);
         }
-        res.render('view', {poll: pollData});
+        res.render('edit', {user: req.user, poll: pollData});
       })
     }
   });
 });
 
+// Shows a poll
+// Must return a JSON with question + possible answers
+app.get('/view', function(req,res){
+  var pollData = {};
+  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+    if(err)
+    {
+      req.session.error = err;
+      return done(err);
+    }
+    if (!poll)
+    {
+      res.redirect('/');
+      req.session.error = "That poll doesn't exist.";
+    }
+    else 
+    {
+      pollData.title = poll.title;
+      pollData.question = [];
+      Question.find({poll_id: poll._id},function(err,questions){
+        if(err)
+        {
+          console.error(err);
+          req.session.error = err;
+          return res.redirect('/');
+        }
 
+        questions.forEach(function(qstn,i)
+        {
+          var quest = {};
+          quest.title = qstn.title;
+          quest.type = qstn.type;
+          quest.answer = [];
+          
+          Answer.find({q_id: qstn._id}, function(err,ans){
+            if(err)
+            {
+              console.error(err);
+              req.session.error = err;
+              return res.redirect('/');
+            }
+
+            iter(ans,function(err,arr)
+            {
+              quest.answer = arr;
+              pollData.question.push(quest);
+              if(questions.length === i+1)
+              {
+                //console.log(pollData);
+                res.render('view', {user: req.user, poll: pollData});
+              }
+            }); 
+          });
+
+        });
+
+      })
+    }
+  });
+});
+
+function iter(ans,callback)
+{
+  var answer = [];
+  ans.forEach(function(val,index){
+    answer.push(val.answer);
+    if(answer.length == ans.length)
+    {
+      callback(null,answer)
+    }
+  });
+}
 
 // Signs up user to system and logs him in inmediatly
 app.post('/signup', function(req, res, next) {
@@ -261,7 +323,8 @@ app.post('/createPoll', loggedIn, function(req, res, next) {
   }).save(function (err, newPoll) {
     if(err)
     {
-      console.log(err);
+      console.error(err);
+      req.session.error = "Check your poll name: it can't be blank or be named the same as another of your polls.";
       return res.redirect('/dashboard');
     }
     else
@@ -272,12 +335,12 @@ app.post('/createPoll', loggedIn, function(req, res, next) {
 // Saves new question to db
 app.post('/newQuestion', function(req, res) {
     var formData = req.body;
+    var ans = formData.answers;
 
     var question = new Question({
       poll_id: formData.pid,
       title: formData.question,
-      type: formData.type,
-      answers: formData.answers
+      type: formData.type
     }).save(function(err, newQuestion){
       if(err)
       {
@@ -285,6 +348,21 @@ app.post('/newQuestion', function(req, res) {
       }
       else
       {
+        ans.forEach(function(val, index){
+          //console.log(val);
+          var answer = new Answer({
+            poll_id: newQuestion.poll_id,
+            q_id: newQuestion._id,
+            answer: val
+          }).save(function(err,newAns){
+            if(err)
+              req.session.error = err;
+            else
+              //console.log("Saved: "+newAns);
+          });          
+        });
+
+
         req.session.notice = "Poll successfully saved";
         return res.json(formData.pid);
       }
