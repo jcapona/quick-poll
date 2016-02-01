@@ -147,7 +147,8 @@ app.post('/login', function(req, res) {
 });
 
 // Allows to edit questions & answers from a certain poll
-app.get('/edit', loggedIn, function(req,res){
+app.get('/edit', function(req,res){
+//app.get('/edit', loggedIn, function(req,res){
   var pollData = {};
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
@@ -164,22 +165,43 @@ app.get('/edit', loggedIn, function(req,res){
     {
       pollData.title = poll.title;
       pollData.question = [];
-      Question.find({poll_id: poll._id},function(err,question){
+      Question.find({poll_id: poll._id},function(err,questions){
         if(err)
         {
           console.error(err);
           req.session.error = err;
           return res.redirect('/');
         }
-        for (var i in question)
+
+        questions.forEach(function(qstn,i)
         {
           var quest = {};
-          quest.title = question[i].title;
-          quest.type = question[i].type;
-          quest.answer = question[i].answers;
-          pollData.question.push(quest);
-        }
-        res.render('edit', {user: req.user, poll: pollData});
+          quest.title = qstn.title;
+          quest.type = qstn.type;
+          quest.answer = [];
+          
+          Answer.find({q_id: qstn._id}, function(err,ans){
+            if(err)
+            {
+              console.error(err);
+              req.session.error = err;
+              return res.redirect('/');
+            }
+
+            iter(ans,function(err,arr)
+            {
+              quest.answer = arr;
+              pollData.question.push(quest);
+              if(questions.length === pollData.question.length)
+              {
+                console.log(pollData);
+                res.render('edit', {user: req.user, poll: pollData});
+              }
+            }); 
+          });
+
+        });
+
       })
     }
   });
@@ -231,7 +253,7 @@ app.get('/view', function(req,res){
             {
               quest.answer = arr;
               pollData.question.push(quest);
-              if(questions.length === i+1)
+              if(questions.length === pollData.question.length)
               {
                 //console.log(pollData);
                 res.render('view', {user: req.user, poll: pollData});
@@ -357,9 +379,9 @@ app.post('/newQuestion', function(req, res) {
           }).save(function(err,newAns){
             if(err)
               req.session.error = err;
-            else
+            //else
               //console.log("Saved: "+newAns);
-          });          
+          });
         });
 
 
