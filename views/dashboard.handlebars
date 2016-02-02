@@ -2,7 +2,7 @@
   <div class="page-header">
     <h1>Dashboard <small>Manage your polls!</small></h1>
   </div>
-  
+
   <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">Profile Information</h3>
@@ -34,7 +34,7 @@
       <div id="new-poll">
         {{#each poll}}
         <div class="row">
-          <div class="col-md-9">{{this.title}}</div>
+          <div class="col-md-8">{{this.title}}</div>
           <div class="col-md-1">
             <form action="/edit" method="get">
               <div class="form-group">
@@ -58,6 +58,9 @@
                 <input type="submit" value="Delete" class="form-control ṕoll-btn">
               </div>
             </form>
+          </div>
+          <div class="col-md-1">
+              <a class="btn btn-info" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll'"><i class="fa fa-twitter fa-fw"></i></a>
           </div>  
         </div>
         {{/each}}
@@ -65,7 +68,6 @@
     </div>
   </div>
 {{/if}}
-
   <div class="panel panel-default">
     
     <div class="panel-heading">
