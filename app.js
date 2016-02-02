@@ -1,7 +1,8 @@
 var express = require('express');
 var exphbs = require('express-handlebars');
 var app = express();
- 
+var findOrCreate = require('mongoose-findorcreate');
+
 // Configure express to use handlebars templates
 var hbs = exphbs.create({defaultLayout: 'main'});
 app.engine('handlebars', hbs.engine);
@@ -47,6 +48,14 @@ var AnswerSchema = new mongoose.Schema({
 });
 var Answer = mongoose.model('answers', AnswerSchema);
 
+var VoteSchema = new mongoose.Schema({
+    poll_id: {type: String, required: true},
+    q_id: {type: String, required: true},
+    ans_id: {type: String, required: true},
+    votes: {type: Number}
+});
+VoteSchema.plugin(findOrCreate);
+var Vote = mongoose.model('votes', VoteSchema);
 
 
 // Auth strategy
@@ -190,6 +199,7 @@ app.get('/edit', function(req,res){
 
             iter(ans,function(err,arr)
             {
+              quest.id = ans._id;
               quest.answer = arr;
               pollData.question.push(quest);
               if(questions.length === pollData.question.length)
@@ -225,6 +235,7 @@ app.get('/view', function(req,res){
     else 
     {
       pollData.title = poll.title;
+      pollData.id = poll._id;
       pollData.question = [];
       Question.find({poll_id: poll._id},function(err,questions){
         if(err)
@@ -239,6 +250,7 @@ app.get('/view', function(req,res){
           var quest = {};
           quest.title = qstn.title;
           quest.type = qstn.type;
+          quest.id = qstn._id;
           quest.answer = [];
           
           Answer.find({q_id: qstn._id}, function(err,ans){
@@ -272,7 +284,7 @@ function iter(ans,callback)
 {
   var answer = [];
   ans.forEach(function(val,index){
-    answer.push(val.answer);
+    answer.push([val._id, val.answer]);
     if(answer.length == ans.length)
     {
       callback(null,answer)
@@ -304,6 +316,59 @@ app.post('/signup', function(req, res, next) {
         });
       });
 });
+
+
+// Gets answers to a poll
+app.post('/vote',function(req,res){
+  Question.find({ poll_id: req.body.id }, function (err, questions) {
+    if(err)
+    {
+      req.session.error = err;
+      return done(err);
+    }
+    var totalQuestions = questions.length;
+    var j = 1;
+
+    questions.forEach(function(q,index) {
+      Vote.findOrCreate({
+        poll_id: req.body.id,
+        q_id: q._id,
+        ans_id: req.body[q._id]
+      },function(err,newVote,created){
+        if(err)
+        {
+          console.error(err);
+          req.session.error = err;
+          //return res.redirect('/signin');
+        }
+        else
+        {
+          var num = newVote.votes == undefined? 1 : newVote.votes+1;
+          Vote.update({
+            poll_id: newVote.poll_id,
+            q_id: newVote.q_id,
+            ans_id: newVote.ans_id,
+          },{votes: num},function(err,doc){
+            if(err)
+            {
+              console.error(err);
+              req.session.error = err;
+              return res.redirect('/');
+            }
+            j++;
+            if(j == totalQuestions)
+            {
+              req.session.success = "Your answers were successfully sent! Thank you!";
+              return res.redirect('/');
+            }
+          });
+
+        }
+      });
+    });
+  });
+});
+
 
 // Display basic user profile info
 app.get('/users/:usr', function (req, res) {
