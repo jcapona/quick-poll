@@ -1,0 +1,23 @@
+h1,h2,h3,p {
+  color: black;
+}
+
+body {
+  background-color: white;
+}
+
+.poll-title {
+	width: 80%;
+}
+
+.poll-btn {
+	display: inline;
+}
+
+.panel-heading {
+	vertical-align: middle;
+}
+
+.results {
+	padding: 20px;
+}
