@@ -221,6 +221,7 @@ app.get('/edit', function(req,res){
 // Must return a JSON with question + possible answers
 app.get('/view', function(req,res){
   var pollData = {};
+  pollData.url = req.headers.host+req.url;
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
     {
@@ -377,17 +378,22 @@ app.get('/users/:usr', function (req, res) {
       if (!userProf)
       {
         req.session.error = "The user does not exist.";
-        res.redirect('/');
+        return res.redirect('/');
       }
       else 
-        res.render('users', {user: req.user, userProfile: userProf});
+      {
+        Poll.find({username: req.params.usr}, function(err, polls) {
+          res.render('users', {user: req.user, userProfile: userProf, poll:polls});
+        });
+
+      }
     });
 });
 
 // Displays user's dashboard
 app.get('/dashboard', loggedIn, function (req, res) {  
   Poll.find({username: req.user.username}, function(err, polls) {
-    res.render('dashboard', {user: req.user, poll: polls}); 
+    res.render('dashboard', {user: req.user, poll: polls, url: req.headers.host}); 
   });
 });
 
@@ -451,7 +457,7 @@ app.get('/results', function(req,res){
                     pollData.question.push(quest);
                     if(questions.length === pollData.question.length)
                     {
-                      console.log(JSON.stringify(pollData,null,2));
+                      //console.log(JSON.stringify(pollData,null,2));
                       res.render('results', {user: req.user, poll: pollData});
                     }
                   }

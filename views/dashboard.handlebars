@@ -33,12 +33,12 @@
       <div id="new-poll">
         {{#each poll}}
         <div class="row">
-          <div class="col-md-7">{{this.title}}</div>
+          <div class="col-md-7"><p>{{this.title}}</p></div>
           <div class="col-md-1">
             <form action="/edit" method="get">
               <div class="form-group">
                 <input class="hidden" name="pid" value={{this._id}}>
-                <input type="submit" value="Edit" class="form-control ṕoll-btn">
+                <input type="submit" value="Edit" class="form-control poll-btn">
               </div>
             </form>
           </div>  
@@ -46,7 +46,7 @@
             <form action="/view" method="get">
               <div class="form-group">
                 <input class="hidden" name="pid" value={{this._id}}>
-                <input type="submit" value="View" class="form-control ṕoll-btn">
+                <input type="submit" value="View" class="form-control poll-btn">
               </div>
             </form>
           </div>
@@ -54,7 +54,7 @@
             <form action="/delete" method="post">
               <div class="form-group">
                 <input class="hidden" name="pid" value={{this._id}}>
-                <input type="submit" value="Delete" class="form-control ṕoll-btn">
+                <input type="submit" value="Delete" class="form-control poll-btn">
               </div>
             </form>
           </div>
@@ -62,12 +62,12 @@
             <form action="/results" method="get">
               <div class="form-group">
                 <input class="hidden" name="pid" value={{this._id}}>
-                <input type="submit" value="Results" class="form-control ṕoll-btn">
+                <input type="submit" value="Results" class="form-control poll-btn">
               </div>
             </form>
           </div>
           <div class="col-md-1">
-              <a class="btn btn-info" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll'"><i class="fa fa-twitter fa-fw"></i></a>
+              <a class="btn btn-info" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll https://quick-poll.herokuapp.com/view?pid={{this._id}}'"><i class="fa fa-twitter fa-fw"></i></a>
           </div>  
         </div>
         {{/each}}

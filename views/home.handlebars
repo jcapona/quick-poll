@@ -1,14 +1,14 @@
 <!-- views/home.handlebars -->
 {{#if user}}
 <div class="jumbotron">
-    <h1>Welcome {{user.username}}!</h3>
+    <h1>Welcome {{user.username}}!</h1>
     <h3>Check your dashboard!</h3>
-    <a class="btn btn-primary btn-lg" href="/dashboard" role="button">Dashboard</a>
+    <h3><a class="btn btn-primary btn-lg" href="/dashboard" role="button">Dashboard</a></h3>
 </div>
 {{else}}
 <div class="jumbotron">
   <h1>Welcome!</h1>
   <h3>Get a poll ready in just seconds!</h3>
-  <p><a class="btn btn-primary btn-lg" href="/signin" role="button">Sign Up</a></p>
+  <h3><a class="btn btn-primary btn-lg" href="/signin" role="button">Sign Up</a></h3>
 </div>
 {{/if}}
