@@ -1,19 +1,26 @@
 <!-- views/users.handlebars -->
 {{#if user}}
 <div class="container">
-  <h1 class="text-center">{{user.username}}</h1>
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Dashboard</h3>
+      <h3 class="panel-title">Profile Information</h3>
     </div>
+
     <div class="panel-body">
-      <img src='{{user.avatar}}' class="thumbnail">
-      <p>Username: {{user.username}}</p>
-      <p>Email: {{user.email}}</p>
-      <p>Member since: {{user.created}}</p>
-      <p>Polls: {{user.polls}}</p>
+      <div class="row">
+        <div class="col-md-3">
+          <a href="#" class="thumbnail"><img src="{{user.avatar}}" class="img-responsive"></a>
+        </div>
+        <div class="col-md-9">
+          <h1>{{user.username}}</h1>
+          <p>E-Mail: {{user.email}}</p>
+          <p>Member since: {{user.created}}</p>
+        </div>
+      </div>
     </div>
   </div>
+
+
 </div>
 {{else}}
      <h1 class="text-center">There's nothing here!</h1>

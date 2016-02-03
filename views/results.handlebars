@@ -17,11 +17,12 @@
         {{/answer}}
       ]);
       // Set chart options
-      var options = {'width':900,
+      var options = {'width':'100%',
                     chart: { title :"{{title}}" },
                     bars: 'horizontal',
-                    hAxis: {'minValue': 0 },
-                    vAxis: {'minValue': 0 },
+                    hAxis: {'minValue': 0, format: '#'},
+                    vAxis: {'minValue': 0, format: '#'},
+                    axes: { x: { 0: {label: 'Votes', format: '#'} } },
                     legend: { position: "none" }
       };
 
@@ -35,9 +36,9 @@
 
   <h1>{{poll.title}}</h1>
   <h2>Results</h2>
-  
+
   {{#poll.question}}
-    <div id="{{id}}" class="jumbotron"></div>
+    <div id="{{id}}" class="container-fluid results"></div>
   {{/poll.question}}
 
 {{/if}}
