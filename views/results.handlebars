@@ -1,0 +1,43 @@
+<!-- views/results.handlebars -->
+{{#if poll}}
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    google.charts.load('current', {'packages':['bar']});
+    
+    {{#poll.question}}
+    google.charts.setOnLoadCallback(drawChart{{id}});
+    function drawChart{{id}}() {
+
+      // Create the data table.
+      var data = new google.visualization.arrayToDataTable([
+        ['Answers', 'Votes'],
+        {{#answer}}
+          ["{{this.[1]}}", {{this.[2]}}],
+        {{/answer}}
+      ]);
+      // Set chart options
+      var options = {'width':900,
+                    chart: { title :"{{title}}" },
+                    bars: 'horizontal',
+                    hAxis: {'minValue': 0 },
+                    vAxis: {'minValue': 0 },
+                    legend: { position: "none" }
+      };
+
+      // Instantiate and draw our chart, passing in some options.
+      var chart = new google.charts.Bar(document.getElementById('{{id}}'));
+      chart.draw(data, options);
+    }
+    {{/poll.question}}
+  });
+  </script>
+
+  <h1>{{poll.title}}</h1>
+  <h2>Results</h2>
+  
+  {{#poll.question}}
+    <div id="{{id}}" class="jumbotron"></div>
+  {{/poll.question}}
+
+{{/if}}

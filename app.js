@@ -369,7 +369,6 @@ app.post('/vote',function(req,res){
   });
 });
 
-
 // Display basic user profile info
 app.get('/users/:usr', function (req, res) {
     User.findOne({ username: req.params.usr }, function (err, user) {
@@ -388,6 +387,84 @@ app.get('/dashboard', loggedIn, function (req, res) {
     res.render('dashboard', {user: req.user, poll: polls}); 
   });
 });
+
+// Displays results
+app.get('/results', function(req,res){
+  if(req.query.pid === undefined)
+  {
+    req.session.error = "The poll you're trying to access does not exist.";
+    return res.redirect('/');
+  }
+
+  var pollData = {};
+  Poll.findOne({ _id: req.query.pid }, function (err, poll) {
+    if(err)
+    {
+      req.session.error = err;
+      return done(err);
+    }
+    if (!poll)
+    {
+      res.redirect('/');
+      req.session.error = "That poll doesn't exist.";
+    }
+    else 
+    {
+      pollData.title = poll.title;
+      pollData.question = [];
+      Question.find({poll_id: poll._id},function(err,questions){
+        if(err)
+        {
+          console.error(err);
+          req.session.error = err;
+          return res.redirect('/');
+        }
+
+        questions.forEach(function(qstn,i)
+        {
+          var quest = {};
+          quest.title = qstn.title;
+          quest.type = qstn.type;
+          quest.id = qstn._id;
+          quest.answer = [];
+
+          Answer.find({q_id: qstn._id}, function(err,ans){
+            if(err)
+            {
+              console.error(err);
+              req.session.error = err;
+              return res.redirect('/');
+            }
+            
+            iter(ans,function(err,arr)
+            {
+              arr.forEach(function(val,index){
+                Vote.findOne({ans_id: val[0]}, function(err,votes){
+                  val.push(votes.votes);
+                  
+                  if((arr.length === index + 1)&&(val.length==3))
+                  {
+                    quest.answer = arr;
+                    pollData.question.push(quest);
+                    if(questions.length === pollData.question.length)
+                    {
+                      console.log(JSON.stringify(pollData,null,2));
+                      res.render('results', {user: req.user, poll: pollData});
+                    }
+                  }
+                });  
+              });
+              
+            }); 
+          });
+
+        });
+
+      });
+    }
+  });
+});
+
 
 // Logs out from session
 app.get('/logout', function(req, res){
@@ -446,9 +523,16 @@ app.post('/newQuestion', function(req, res) {
               req.session.error = err;
             //else
               //console.log("Saved: "+newAns);
+            var vote = new Vote({
+              poll_id: formData.pid,
+              q_id: newQuestion._id,
+              ans_id: newAns._id,
+              votes: 0
+            }).save(function(err,newVote){
+              console.log("Created vote table item :)");
+            });
           });
         });
-
 
         req.session.notice = "Poll successfully saved";
         return res.json(formData.pid);
