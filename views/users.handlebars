@@ -1,5 +1,5 @@
 <!-- views/users.handlebars -->
-{{#if user}}
+{{#if userProfile}}
 <div class="container">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -9,12 +9,12 @@
     <div class="panel-body">
       <div class="row">
         <div class="col-md-3">
-          <a href="#" class="thumbnail"><img src="{{user.avatar}}" class="img-responsive"></a>
+          <a href="#" class="thumbnail"><img src="{{userProfile.avatar}}" class="img-responsive"></a>
         </div>
         <div class="col-md-9">
-          <h1>{{user.username}}</h1>
-          <p>E-Mail: {{user.email}}</p>
-          <p>Member since: {{user.created}}</p>
+          <h1>{{userProfile.username}}</h1>
+          <p>E-Mail: {{userProfile.email}}</p>
+          <p>Member since: {{userProfile.created}}</p>
         </div>
       </div>
     </div>
@@ -22,7 +22,5 @@
 
 
 </div>
-{{else}}
-     <h1 class="text-center">There's nothing here!</h1>
 {{/if}}
 

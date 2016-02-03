@@ -371,13 +371,16 @@ app.post('/vote',function(req,res){
 
 // Display basic user profile info
 app.get('/users/:usr', function (req, res) {
-    User.findOne({ username: req.params.usr }, function (err, user) {
+    User.findOne({ username: req.params.usr }, function (err, userProf) {
       if(err)
         return done(err);
-      if (!user)
-        res.render('users'  );
+      if (!userProf)
+      {
+        req.session.error = "The user does not exist.";
+        res.redirect('/');
+      }
       else 
-        res.render('users', {user: user});
+        res.render('users', {user: req.user, userProfile: userProf});
     });
 });
 
