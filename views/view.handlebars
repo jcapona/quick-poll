@@ -1,11 +1,10 @@
 <!-- views/view.handlebars -->
 {{#if poll}}
 <div class="container">
-    <div class="row">
-      <div class="col-md-10"><h1>{{poll.title}}</h1></div>
-      <div class="col-md-2"><a class="btn btn-info" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll http://{{poll.url}}'"><i class="fa fa-twitter fa-fw"></i>Tweet</a></div>
-    </div>
-    
+  <div class="page-header">
+    <h1>{{poll.title}} <small>by {{poll.username}}</small></h1>
+  </div>
+
   <form action="/vote" method="post">
   <input class="hidden" name="id" value="{{poll.id}}">
   <ol>  
@@ -19,8 +18,13 @@
       </ul>
     {{/poll.question}}
   </ol>
-  <input type="submit" value="Submit" class="form-control">
+  <div class="text-center"><input type="submit" value="Submit" class="btn"></div>
   </form>
+  <hr>
+  <div class="text-center">
+    <p>Want to share this poll? <a class="btn btn-info btn-sm" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll http://{{poll.url}}'"><i class="fa fa-twitter fa-fw"></i>Tweet</a></p>
+  </div>
+
 </div>
 {{else}}
     <p>Nothing to see here</p>

@@ -236,6 +236,7 @@ app.get('/view', function(req,res){
     else 
     {
       pollData.title = poll.title;
+      pollData.username = poll.username;
       pollData.id = poll._id;
       pollData.question = [];
       Question.find({poll_id: poll._id},function(err,questions){
