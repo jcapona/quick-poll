@@ -24,20 +24,25 @@ body {
 
 #logo {
 	font-family: 'Indie Flower', cursive;
-	font-size: 200%;
+	
 	color: #1985A1;
 }
 
 h1 {
-	font-family: 'Indie Flower', cursive;
+	font-family: 'Droid Sans', sans-serif;
 	font-size: 250%;
 	color: #4C5C68;
 }
 
 h2,h3,p,a,button,input,label {
-	font-family: 'Open Sans Condensed', sans-serif;
+	font-family: 'Droid Sans', sans-serif;
 }
 
 p,label,input,a,button {
-	font-size: 150%;
+	
+}
+
+.img-center {
+    margin-left: auto;
+    margin-right: auto;
 }

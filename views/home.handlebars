@@ -1,14 +1,16 @@
 <!-- views/home.handlebars -->
-{{#if user}}
 <div class="jumbotron">
-    <h1>Welcome {{user.username}}!</h1>
-    <h3>Check your dashboard!</h3>
-    <h3><a class="btn btn-primary btn-lg" href="/dashboard" role="button">Dashboard</a></h3>
+  <h1 class="text-center">Create polls faster</h1>
+  <h3 class="text-center">Get a poll ready in just seconds!</h3>
+  <img class="img-center img-responsive" src="http://www.123contactform.com/images3/new/free-online-poll-maker.png">
+  <div class="row">
+    <div class="col-md-6">
+      <p class="text-right">Register for free and learn </p>
+    </div>
+    <div class="col-md-6">
+      <a class="btn btn-primary btn-lg text-left" href="/signin" role="button">Sign Up</a>
+    </div>
+  </div>
 </div>
-{{else}}
-<div class="jumbotron">
-  <h1>Welcome!</h1>
-  <h3>Get a poll ready in just seconds!</h3>
-  <h3><a class="btn btn-primary btn-lg" href="/signin" role="button">Sign Up</a></h3>
-</div>
-{{/if}}
+<h1 id="logo" class="text-center">Quick-Poll</h1>
+<p class="text-center">©2016 All Rights Reserved. Quick-Poll</p>

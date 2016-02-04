@@ -33,12 +33,13 @@
     {{/poll.question}}
   });
   </script>
-
+  
+<div class="container">
   <h1>{{poll.title}}</h1>
   <h2>Results</h2>
 
   {{#poll.question}}
     <div id="{{id}}" class="container-fluid results"></div>
   {{/poll.question}}
-
+</div>
 {{/if}}

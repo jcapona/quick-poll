@@ -204,7 +204,7 @@ app.get('/edit', function(req,res){
               pollData.question.push(quest);
               if(questions.length === pollData.question.length)
               {
-                console.log(pollData);
+                //console.log(pollData);
                 res.render('edit', {user: req.user, poll: pollData});
               }
             }); 

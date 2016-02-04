@@ -1,5 +1,6 @@
 <!-- views/view.handlebars -->
 {{#if poll}}
+<div class="container">
     <div class="row">
       <div class="col-md-10"><h1>{{poll.title}}</h1></div>
       <div class="col-md-2"><a class="btn btn-info" target='_blank' id="twitter-share" href="http://twitter.com/intent/tweet?text='Do you have a minute? Please, take my poll http://{{poll.url}}'"><i class="fa fa-twitter fa-fw"></i>Tweet</a></div>
@@ -20,7 +21,7 @@
   </ol>
   <input type="submit" value="Submit" class="form-control">
   </form>
-
+</div>
 {{else}}
     <p>Nothing to see here</p>
 {{/if}}
