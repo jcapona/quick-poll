@@ -6,6 +6,9 @@ body {
   background-color: white;
 }
 
+.jumbotron {
+	padding-bottom: 50px;
+}
 .poll-title {
 	width: 80%;
 }
@@ -45,4 +48,10 @@ p,label,input,a,button {
 .img-center {
     margin-left: auto;
     margin-right: auto;
+}
+
+.vert-center {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }
