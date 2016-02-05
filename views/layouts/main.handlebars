@@ -17,14 +17,14 @@
   <link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
-  
+
   <title>Quick-Poll | Create your poll in just seconds...</title>  
 </head>
 
 <body>
 
 <nav class="navbar navbar-default">
-  <div class="container-fluid">
+  <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
@@ -72,9 +72,14 @@
   {{/if}}
 </div>
 
-<div class="container-fluid">
-  {{{body}}}
-</div>
+  <div class="container-fluid">
+    {{{body}}}
+  </div>
+
+  <div class="container">
+    <h1 id="logo" class="text-center" style="font-size: 300%;">Quick-Poll</h1>
+    <p class="text-center" style="font-size: 75%;">©2016 All Rights Reserved. Quick-Poll</p>
+  </div>
 
 </body>
 </html>
