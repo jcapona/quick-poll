@@ -326,7 +326,7 @@ app.post('/signup', function(req, res, next) {
 app.post('/vote',function(req,res){
   var isError = false;
   // Check for empty form or unanswered questions
-  if(Object.keys(req.body).length <= req.body.total+2)
+  if(Object.keys(req.body).length != Number(Number(req.body.total)+2))
   {
     isError = true;
     console.error("Please, answer all the questions");
