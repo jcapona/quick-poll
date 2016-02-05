@@ -5,20 +5,21 @@
     <h1>{{poll.title}} <small>by {{poll.username}}</small></h1>
   </div>
 
-  <form action="/vote" method="post">
-  <input class="hidden" name="id" value="{{poll.id}}">
-  <ol>  
-  {{#poll.question}}
-    <li><p>{{title}}</p></li>
-    {{#answer}}
-    <div class="{{../type}}">
-      <label><input type="{{../type}}" name="{{../id}}" value="{{this.[0]}}">{{this.[1]}}</label>
-    </div>
-      {{/answer}}
-      </ul>
-    {{/poll.question}}
-  </ol>
-  <div class="text-center"><input type="submit" value="Submit" class="btn"></div>
+  <form name="poll" id="poll" action="/vote" method="post">
+    <input class="hidden" name="id" value="{{poll.id}}">
+    <input class="hidden" name="total" value="{{poll.question.length}}">
+    <ol>  
+    {{#poll.question}}
+      <li><p>{{title}}</p></li>
+      {{#answer}}
+      <div class="{{../type}}">
+        <label><input type="{{../type}}" name="{{../id}}" value="{{this.[0]}}" class="form-field">{{this.[1]}}</label>
+      </div>
+        {{/answer}}
+        </ul>
+      {{/poll.question}}
+    </ol>
+    <div class="text-center"><input type="submit" value="Submit" class="btn"></div>
   </form>
   <hr>
   <div class="text-center">

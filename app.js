@@ -121,7 +121,10 @@ app.get('/', function (req, res) {
 });
 
 app.get('/signin', function (req, res) {
-  res.render('signin');
+  if(req.user === undefined)
+    res.render('signin');
+  else
+    res.redirect('/dashboard');
 });
 
 // Logs user in
@@ -226,12 +229,12 @@ app.get('/view', function(req,res){
     if(err)
     {
       req.session.error = err;
-      return done(err);
+      return res.redirect('/');
     }
     if (!poll)
     {
-      res.redirect('/');
       req.session.error = "That poll doesn't exist.";
+      return res.redirect('/');
     }
     else 
     {
@@ -319,14 +322,26 @@ app.post('/signup', function(req, res, next) {
       });
 });
 
-
 // Gets answers to a poll
 app.post('/vote',function(req,res){
+  var isError = false;
+  // Check for empty form or unanswered questions
+  if(Object.keys(req.body).length <= req.body.total+2)
+  {
+    isError = true;
+    console.error("Please, answer all the questions");
+    req.session.error = "Please, answer all the questions";
+    return res.redirect('view?pid='+req.body.id);
+  }
+
   Question.find({ poll_id: req.body.id }, function (err, questions) {
-    if(err)
+    if(err && (!isError))
     {
-      req.session.error = err;
-      return done(err);
+      isError = true;
+      console.error(err);
+      req.session.error = err.message;
+      isError = true;
+      return res.redirect('view?pid='+req.body.id);
     }
     var totalQuestions = questions.length;
     var j = 1;
@@ -337,31 +352,38 @@ app.post('/vote',function(req,res){
         q_id: q._id,
         ans_id: req.body[q._id]
       },function(err,newVote,created){
-        if(err)
+        if(err&&(!isError))
         {
+          isError = true;
           console.error(err);
-          req.session.error = err;
-          //return res.redirect('/signin');
+          var asd = 'view?pid='+req.body.id;
+          req.session.error = "Error saving your preferences. Please try again.";
+          return res.redirect(asd.toString());
         }
         else
         {
-          var num = newVote.votes == undefined? 1 : newVote.votes+1;
+          var num = newVote.votes == undefined? 1 : newVote.votes + 1;
           Vote.update({
             poll_id: newVote.poll_id,
             q_id: newVote.q_id,
             ans_id: newVote.ans_id,
           },{votes: num},function(err,doc){
-            if(err)
+            if(err&&(!isError))
             {
+              isError = true;
               console.error(err);
-              req.session.error = err;
-              return res.redirect('/');
+              req.session.error = "Error saving your preferences. Please try again.";
+              return res.redirect('view?pid='+req.body.id);
             }
-            j++;
-            if(j == totalQuestions)
+            else
             {
-              req.session.success = "Your answers were successfully sent! Thank you!";
-              return res.redirect('/');
+              j++;
+              if((j == totalQuestions)&&(!isError))
+              {
+                console.log("Success");
+                req.session.success = "Your answers were successfully sent! Thank you!";
+                return res.redirect('/');
+              }
             }
           });
 
