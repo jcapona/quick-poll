@@ -175,6 +175,12 @@ app.get('/edit', function(req,res){
     }
     else 
     {
+      if((req.user === undefined)||(poll.username !== req.user.username))
+      {
+        req.session.error = "You can't edit this poll.";
+        return res.redirect('/');
+      }
+
       pollData.title = poll.title;
       pollData.question = [];
       Question.find({poll_id: poll._id},function(err,questions){
