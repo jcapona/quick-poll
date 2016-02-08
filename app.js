@@ -382,7 +382,7 @@ app.post('/vote',function(req,res){
               {
                 console.log("Success");
                 req.session.success = "Your answers were successfully sent! Thank you!";
-                return res.redirect('/');
+                return res.redirect('/results?pid='+req.body.id);
               }
             }
           });
