@@ -12,7 +12,7 @@
             </div>
             <div class="col-md-2">
               <button type="submit" class="btn btn-default save_btn" inline><i class="fa fa-save"></i></button>
-              <button type="button" class="btn btn-default del-question" inline><i class="fa fa-remove "></i></button>
+              <form name="del-question" action="/deleteQuestion" method="post"><button type="submit" name="q_id" value="{{id}}" class="btn btn-default del-question" inline><i class="fa fa-remove "></i></button></form>
             </div>
           </div>
       </div>

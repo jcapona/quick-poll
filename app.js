@@ -196,6 +196,7 @@ app.get('/edit', loggedIn, function(req,res){
           var quest = {};
           quest.title = qstn.title;
           quest.type = qstn.type;
+          quest.id = qstn._id;
           quest.answer = [];
           
           Answer.find({q_id: qstn._id}, function(err,ans){
@@ -211,7 +212,6 @@ app.get('/edit', loggedIn, function(req,res){
             {
               iter(ans,function(err,arr)
               {
-                quest.id = ans._id;
                 quest.answer = arr;
                 pollData.question.push(quest);
                 if(questions.length === pollData.question.length)
@@ -583,7 +583,7 @@ app.post('/newQuestion', function(req, res) {
     });
 });
 
-// Deletes poll from DB (poll+answers-all+answer-selected)
+// Deletes poll from DB (poll+answers+questions+votes)
 app.post('/delete', loggedIn, function(req, res) {
   Question.remove({ poll_id : req.body.pid}, function(err){
     if(err)
@@ -629,6 +629,42 @@ app.post('/delete', loggedIn, function(req, res) {
   });
 });
 
+// Deletes question from DB (answers+questions+votes)
+app.post('/deleteQuestion', loggedIn, function(req, res) {
+
+  Question.remove({ _id : req.body.q_id}, function(err){
+    if(err)
+    {
+      req.session.error = "Error deleting question.";
+      return res.redirect('/dashboard');
+    }
+    else
+    {
+      Answer.remove({ q_id : req.body.q_id}, function(err){
+        if(err)
+        {
+          req.session.error = "Error deleting question answers.";
+          return res.redirect('/dashboard');
+        }
+        else
+        {
+          Vote.remove({q_id: req.body.q_id}, function(err){
+            if(err)
+            {
+              req.session.error = "Error deleting question votes.";
+              return res.redirect('/dashboard');
+            }
+            else
+            {
+              req.session.success = "Question deleted successfully";
+              return res.redirect('/dashboard');
+            }
+          });
+        }
+      });
+    }
+  });
+});
 
 app.listen(process.env.PORT || 5000);
 
