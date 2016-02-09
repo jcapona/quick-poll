@@ -666,6 +666,25 @@ app.post('/deleteQuestion', loggedIn, function(req, res) {
   });
 });
 
+// Saves new answer to DB (answer+votes)
+app.post('/saveAnswers', loggedIn, function(req, res) {
+  var i=0;
+  req.body.answers.forEach(function(val,index){
+    var answer = new Answer({
+              poll_id: req.body.poll_id,
+              q_id: req.body.q_id,
+              answer: val
+            }).save(function(err,newAns){
+              i++;
+              if(i == req.body.answers.length)
+              {
+                req.session.success = "New answers saved.";
+                res.json("Saved");
+              }
+            });
+  });
+});
+
 app.listen(process.env.PORT || 5000);
 
 

@@ -11,7 +11,7 @@
               {{title}}
             </div>
             <div class="col-md-2">
-              <button type="submit" class="btn btn-default save_btn" inline><i class="fa fa-save"></i></button>
+              <button type="button" class="btn btn-default disabled save_btn" value="{{id}}" inline><i class="fa fa-save"></i></button>
               <form name="del-question" action="/deleteQuestion" method="post"><button type="submit" name="q_id" value="{{id}}" class="btn btn-default del-question" inline><i class="fa fa-remove "></i></button></form>
             </div>
           </div>
@@ -26,12 +26,9 @@
             </div>
           </div>
           <div class="col-md-11">
-          {{#answer}}
-            <div class="input-group">
-              <input type="text" class="form-control ans" value='{{this.[1]}}'>
-              <div class="input-group-btn"><button class="btn btn-default remove_field" type="button"><i class="fa fa-times"></i></button></div>
-            </div>
-          {{/answer}}
+            {{#answer}}
+            <p>{{this.[1]}}</p>
+            {{/answer}}
             <span class="added"></span>
             <button class="btn btn-default add_option form-control" type="button"><i class="fa fa-plus"></i> Add Option</button>
           </div>
@@ -57,6 +54,7 @@ $(document).ready(function() {
     var html = '<div class="input-group"><input type="text" class="form-control ans" placeholder="Option">';
     html += '<div class="input-group-btn"><button class="btn btn-default remove_field" type="button"><i class="fa fa-times"></i></button></div></div>';
     $(this).parent().parent('div').find('span').append(html);
+    $(this).parent().parent().parent().parent('div').find('.save_btn').removeClass("disabled");
   });
 
   $(document).on('click','.remove_field',function (e){
@@ -67,36 +65,34 @@ $(document).ready(function() {
 
 
  $(document).on('click','.save_btn',function (e){
-
-    console.log(e);
-    console.log($(this));
-    var answers = [];
-    $.each($('.ans'), function() {
-      answers.push($(this).val().toString());
-    });
-
-    if(answers.length == 0) {
-      answers = "none";
-    }
     e.stopPropagation();
     e.preventDefault();
 
-    console.log(answers);
-    /*
-    $.ajax({
-      url: '/newQuestion',
-      type: 'POST',
-      dataType: 'json',
-      data: form,
-      error: function(jqXHR, textStatus, errorThrown){
-        alert('Error: ' + textStatus);
-      },
-      success: function(data){
-        $("#decission-section").removeClass("hidden");
-        $("#answers-section").addClass("hidden");
-      }
+    var answers = [];
+    $.each($(this).parent().parent().parent().parent().parent().find('.ans'), function() {
+      if($(this)['0']['value'] !== '')
+        answers.push($(this)['0']['value']);
     });
-    */
+
+    if(answers.length != 0)
+    {
+      var form = {};
+      form.poll_id = (window.location.search).replace('?pid=','');
+      form.q_id = e['currentTarget']['attributes']['2']['value'];
+      form.answers = answers;
+      $.ajax({
+        url: '/saveAnswers',
+        type: 'POST',
+        dataType: 'json',
+        data: form,
+        error: function(jqXHR, textStatus, errorThrown){
+          alert('Error: ' + textStatus);
+        },
+        success: function(data){
+          location.reload();
+        }
+      });
+    }
   });
 });
 </script>
