@@ -159,8 +159,7 @@ app.post('/login', function(req, res) {
 });
 
 // Allows to edit questions & answers from a certain poll
-app.get('/edit', function(req,res){
-//app.get('/edit', loggedIn, function(req,res){
+app.get('/edit', loggedIn, function(req,res){
   var pollData = {};
   Poll.findOne({ _id: req.query.pid }, function (err, poll) {
     if(err)
@@ -175,7 +174,7 @@ app.get('/edit', function(req,res){
     }
     else 
     {
-      if((req.user === undefined)||(poll.username !== req.user.username))
+      if(poll.username !== req.user.username)
       {
         req.session.error = "You can't edit this poll.";
         return res.redirect('/');
@@ -191,6 +190,7 @@ app.get('/edit', function(req,res){
           return res.redirect('/');
         }
 
+        var isError = false;
         questions.forEach(function(qstn,i)
         {
           var quest = {};
@@ -203,20 +203,24 @@ app.get('/edit', function(req,res){
             {
               console.error(err);
               req.session.error = err;
+              isError = true;
               return res.redirect('/');
             }
 
-            iter(ans,function(err,arr)
+            if(!isError)
             {
-              quest.id = ans._id;
-              quest.answer = arr;
-              pollData.question.push(quest);
-              if(questions.length === pollData.question.length)
+              iter(ans,function(err,arr)
               {
-                //console.log(pollData);
-                res.render('edit', {user: req.user, poll: pollData});
-              }
-            }); 
+                quest.id = ans._id;
+                quest.answer = arr;
+                pollData.question.push(quest);
+                if(questions.length === pollData.question.length)
+                {
+                  //console.log(pollData);
+                  res.render('edit', {user: req.user, poll: pollData});
+                }
+              }); 
+            }
           });
 
         });
@@ -567,7 +571,8 @@ app.post('/newQuestion', function(req, res) {
               ans_id: newAns._id,
               votes: 0
             }).save(function(err,newVote){
-              console.log("Created vote table item :)");
+              if(err)
+                req.session.error = err;
             });
           });
         });
@@ -580,43 +585,49 @@ app.post('/newQuestion', function(req, res) {
 
 // Deletes poll from DB (poll+answers-all+answer-selected)
 app.post('/delete', loggedIn, function(req, res) {
-  Question.findOne({ poll_id : req.body.pid}, function(err,question){
+  Question.remove({ poll_id : req.body.pid}, function(err){
     if(err)
-      return done(err);
-    else if(question == null)
     {
-      res.redirect('/dashboard');
-      req.session.error = "The poll is already deleted";
+      req.session.error = "Error deleting poll questions.";
+      return res.redirect('/dashboard');
     }
     else
-      question.remove(function(err){
+    {
+      Answer.remove({ poll_id : req.body.pid}, function(err){
         if(err)
-          return done(err); 
+        {
+          req.session.error = "Error deleting poll answers.";
+          return res.redirect('/dashboard');
+        }
         else
         {
-          Poll.findOne({ _id : req.body.pid}, function(err,poll){
-              if(err)
-                  return done(err);
-              else if(question == null)
-              {
-                res.redirect('/dashboard');
-                req.session.error = "The poll is already deleted";
-              }
-              else
-                poll.remove(function(err){
-                  if(err)
-                    return done(err); 
-                  else
-                  {
-                    res.redirect('/dashboard');
-                    req.session.success = "Poll deleted successfully";
-                  }
-                });
+          Poll.remove({ _id : req.body.pid}, function(err){
+            if(err)
+            {
+              req.session.error = "Error deleting poll.";
+              return res.redirect('/dashboard');
+            }
+            else
+            {
+              Vote.remove({poll_id: req.body.pid}, function(err){
+                if(err)
+                {
+                  req.session.error = "Error deleting poll votes.";
+                  return res.redirect('/dashboard');
+                }
+                else
+                {
+                  req.session.success = "Poll deleted successfully";
+                  return res.redirect('/dashboard');
+                }
+              });
+            }
           });
         }
       });
+    }
   });
-  });
+});
 
 
 app.listen(process.env.PORT || 5000);
