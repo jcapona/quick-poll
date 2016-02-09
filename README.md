@@ -2,7 +2,6 @@
 
 Allows you to create and share polls! 
 
-Uses NodeJS+MongoDB+Handlebars
+Created using NodeJS + MongoDB + Handlebars
 
-Use it!
-["http://quick-poll.herokuapp.com"](http://quick-poll.herokuapp.com)
+Use it! It's free :) [http://quick-poll.herokuapp.com](http://quick-poll.herokuapp.com)
